@@ -1,5 +1,5 @@
 resource "azurerm_public_ip" "my-public-ip" {
-  name                = "Public-ip-${var.name-vm1}"
+  name                = "Public-ip-${var.name-vm1}-${random_id.name.hex}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location1
   allocation_method   = "Static"
@@ -10,12 +10,12 @@ resource "azurerm_public_ip" "my-public-ip" {
 }
 
 resource "azurerm_network_interface" "mynetworkinterface" {
-  name                = "network-interface-${var.name-vm1}"
+  name                = "network-interface-${var.name-vm1}-${random_id.name.hex}"
   location            = var.location1
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "internal-${var.name-vm1}"
+    name                          = "internal-${var.name-vm1}-${random_id.name.hex}"
     subnet_id                     = azurerm_subnet.subnet1.id
     private_ip_address_allocation = "Static"
     private_ip_address            = var.ip_dns_adds
@@ -26,12 +26,12 @@ resource "azurerm_network_interface" "mynetworkinterface" {
 
 # Windows 11 Virtual Machine
 resource "azurerm_windows_virtual_machine" "myvirtualmachine" {
-  name                = "vm-${var.name-vm1}"
+  name                = "vm-${var.name-vm1}-${random_id.name.hex}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location1
   size                = var.my_virtual_machine_size
   admin_username      = var.win_username
-  admin_password      = var.win_userpass
+  admin_password      = random_password.win_userpass.result
   network_interface_ids = [
     azurerm_network_interface.mynetworkinterface.id,
   ]
@@ -52,12 +52,12 @@ resource "azurerm_windows_virtual_machine" "myvirtualmachine" {
 }
 # Security Group - allowing RDP Connection
 resource "azurerm_network_security_group" "sg-rdp-connection" {
-  name                = "allowrdpconnection-${var.name-vm1}"
+  name                = "allowrdpconnection-${var.name-vm1}-${random_id.name.hex}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   security_rule {
-    name                       = "rdpport"
+    name                       = "rdpport-${random_id.name.hex}"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"

@@ -54,6 +54,7 @@ variable "vnet2-name" {
 variable "win_username" {
   description = "Windows Username"
   type        = string
+  default = "adminlab"
   sensitive   = false
 }
 
@@ -61,6 +62,7 @@ variable "win_userpass" {
   description = "Windows Password"
   type        = string
   sensitive   = true
+  default     = null # Será definida pelo recurso random_password
 }
 
 variable "my_virtual_machine_size" {
@@ -94,6 +96,7 @@ variable "ip_dns_adds" {
   default = "10.10.1.100"
 
 }
+
 
 
 

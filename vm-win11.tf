@@ -1,8 +1,8 @@
 resource "azurerm_public_ip" "my-public-ip2" {
-  name                = "Public-ip-${var.name-vm3}"
+  name                = "Public-ip-${var.name-vm3}-${random_id.name.hex}"
   resource_group_name = azurerm_resource_group.rg2.name
   location            = var.location2
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 
   tags = {
     environment = "Testing"
@@ -10,18 +10,17 @@ resource "azurerm_public_ip" "my-public-ip2" {
 
   depends_on = [
     azurerm_virtual_network_dns_servers.dns2,
-    azurerm_windows_virtual_machine.myvirtualmachine1,
     time_sleep.wait_120_seconds
   ]
 }
 
 resource "azurerm_network_interface" "mynetworkinterface2" {
-  name                = "network-interface-${var.name-vm3}"
+  name                = "network-interface-${var.name-vm3}-${random_id.name.hex}"
   location            = var.location2
   resource_group_name = azurerm_resource_group.rg2.name
 
   ip_configuration {
-    name                          = "internal-${var.name-vm3}"
+    name                          = "internal-${var.name-vm3}-${random_id.name.hex}"
     subnet_id                     = azurerm_subnet.subnet2.id
     private_ip_address_allocation = "Dynamic"
 
@@ -30,7 +29,6 @@ resource "azurerm_network_interface" "mynetworkinterface2" {
 
   depends_on = [
     azurerm_virtual_network_dns_servers.dns2,
-    azurerm_windows_virtual_machine.myvirtualmachine1,
     time_sleep.wait_120_seconds
   ]
 
@@ -38,12 +36,12 @@ resource "azurerm_network_interface" "mynetworkinterface2" {
 
 # Windows 11 Virtual Machine
 resource "azurerm_windows_virtual_machine" "myvirtualmachine2" {
-  name                = "vm-${var.name-vm3}"
+  name                = "vm-${var.name-vm3}-${random_id.name.hex}"
   resource_group_name = azurerm_resource_group.rg2.name
   location            = var.location2
   size                = var.my_virtual_machine_size
   admin_username      = var.win_username
-  admin_password      = var.win_userpass
+  admin_password      = random_password.win_userpass.result
   network_interface_ids = [
     azurerm_network_interface.mynetworkinterface2.id,
   ]
@@ -62,7 +60,6 @@ resource "azurerm_windows_virtual_machine" "myvirtualmachine2" {
 
   depends_on = [
     azurerm_virtual_network_dns_servers.dns2,
-    azurerm_windows_virtual_machine.myvirtualmachine1,
     time_sleep.wait_120_seconds
   ]
 
@@ -71,12 +68,12 @@ resource "azurerm_windows_virtual_machine" "myvirtualmachine2" {
 
 # Security Group - allowing RDP Connection
 resource "azurerm_network_security_group" "sg-rdp-connection2" {
-  name                = "allowrdpconnection-${var.name-vm3}"
+  name                = "allowrdpconnection-${var.name-vm3}-${random_id.name.hex}"
   location            = var.location2
   resource_group_name = azurerm_resource_group.rg2.name
 
   security_rule {
-    name                       = "rdpport"
+    name                       = "rdpport-${random_id.name.hex}"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
@@ -119,13 +116,11 @@ resource "azurerm_virtual_machine_extension" "join-domain2" {
 SETTINGS
   protected_settings = <<PROTECTED_SETTINGS
     {
-      "Password": "${var.win_userpass}"
+      "Password": "${random_password.win_userpass.result}"
     }
   PROTECTED_SETTINGS
   depends_on = [
     azurerm_virtual_network_dns_servers.dns2,
-    azurerm_windows_virtual_machine.myvirtualmachine1,
-    azurerm_virtual_machine_extension.join-domain1,
     time_sleep.wait_120_seconds
   ]
 }
